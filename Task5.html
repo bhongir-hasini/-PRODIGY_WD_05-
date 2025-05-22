@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #67b26f, #4ca2cd);
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 100px auto;
+            padding: 30px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        input, button {
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            width: 80%;
+            max-width: 400px;
+            outline: none;
+        }
+
+        input {
+            background-color: #f1f1f1;
+        }
+
+        button {
+            background-color: #4ca2cd;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #3a8ab8;
+        }
+
+        #weather {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #333; 
+        }
+
+        #weather h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        #weather p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Weather App 🌦️</h2>
+        <input type="text" id="city" placeholder="Enter city name">
+        <button onclick="getWeather()">Get Weather</button>
+        <button onclick="getLocationWeather()">Use My Location</button>
+        <div id="weather"></div>
+    </div>
+
+    <script>
+        const apiKey = 'd6e13222a0d8c49533a32396985b24da'; 
+
+        function getWeather() {
+            const city = document.getElementById('city').value;
+            if (!city) return alert('Please enter a city name.');
+            fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data); 
+                    displayWeather(data);
+                })
+                .catch(error => console.error('Error fetching weather:', error));
+        }
+
+        function getLocationWeather() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const { latitude, longitude } = position.coords;
+                    fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`)
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log(data); 
+                            displayWeather(data);
+                        })
+                        .catch(error => console.error('Error fetching location weather:', error));
+                });
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
+        }
+
+        function displayWeather(data) {
+            if (data.cod !== 200) {
+                document.getElementById('weather').innerHTML = `<p>${data.message}</p>`;
+                return;
+            }
+            document.getElementById('weather').innerHTML = `
+                <h3>${data.name}, ${data.sys.country}</h3>
+                <p><strong>Temperature:</strong> ${data.main.temp}°C</p>
+                <p><strong>Weather:</strong> ${data.weather[0].description}</p>
+                <p><strong>Humidity:</strong> ${data.main.humidity}%</p>
+                <p><strong>Wind Speed:</strong> ${data.wind.speed} m/s</p>
+            `;
+        }
+    </script>
+</body>
+</html>
